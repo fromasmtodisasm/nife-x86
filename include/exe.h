@@ -6,6 +6,10 @@
 #define INTEL386                      0x014c
 #define IMAGE_FILE_EXECUTABLE_IMAGE   0x0002
 
+#define IMAGE_SUBSYSTEM_NATIVE        0x0001
+#define IMAGE_SUBSYSTEM_WINGUI        0x0002
+#define IMAGE_SUBSYSTEM_WINCUI        0x0003
+
 typedef struct          // OFFSET
 {                       // DEC   HEX
   uint8  signature[2];  // 0     0
@@ -44,7 +48,7 @@ typedef struct
   uint32 nsymbols;
   uint16 size_of_optional_header;
   uint16 characteristics;
-} __attribute__((__packed__)) coff_header_t;
+} __attribute__((packed)) coff_header_t;
 
 typedef struct
 {
@@ -89,12 +93,27 @@ typedef struct
 
 typedef struct
 {
+  uint8  name[8];
+  uint32 physical_address;
+  uint32 virtual_address;
+  uint32 size_of_rawdata;
+  uint32 pointer_to_rawdata;
+  uint32 pointer_to_reloc;
+  uint32 pointer_to_linenumbers;
+  uint16 nreloc;
+  uint16 nlinenumbers;
+  uint32 characteristics;
+} __attribute__((packed)) section_header_t;
+
+typedef struct
+{
   uint8* raw_file;
 
   dos_header_t*         dos_header;
   pe_header_t*          pe_header;
   coff_header_t*        coff_header;
   pe_optional_header_t* pe_optional_header;
+  section_header_t*     section_headers;
 } exe_t;
 
 exe_t* parse_exe(const char* filename);

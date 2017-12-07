@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "exe.h"
 
@@ -44,6 +45,7 @@ exe_t* parse_exe(const char* name)
   exe->pe_header          = NULL;
   exe->coff_header        = NULL;
   exe->pe_optional_header = NULL;
+  exe->section_headers    = NULL;
 
   exe->dos_header = malloc(sizeof(dos_header_t));
   memcpy(exe->dos_header, exe->raw_file, sizeof(dos_header_t));
@@ -94,6 +96,50 @@ exe_t* parse_exe(const char* name)
     return NULL;
   }
 
+  printf("OS Version required: %d.%d\n", exe->pe_optional_header->major_osversion,
+		                         exe->pe_optional_header->minor_osversion);
+
+  printf("Program version: %d.%d\n", exe->pe_optional_header->major_image_version,
+		                     exe->pe_optional_header->minor_image_version);
+
+  printf("Subsystem: ");
+
+  switch(exe->pe_optional_header->subsystem)
+  {
+    case IMAGE_SUBSYSTEM_NATIVE: printf("Native\n");               break;
+    case IMAGE_SUBSYSTEM_WINGUI: printf("Windows GUI\n");          break;
+    case IMAGE_SUBSYSTEM_WINCUI: printf("Windows Command-line\n"); break;
+    default:                     printf("Unknown\n");              break;
+  }
+
+  int nsections = exe->coff_header->nsections;
+
+  addr += sizeof(pe_optional_header_t);
+  
+  exe->section_headers = malloc(nsections * sizeof(section_header_t));
+  memcpy(exe->section_headers, &exe->raw_file[addr], nsections * sizeof(section_header_t));
+
+  int section, j;
+  for(section = 0; section < nsections; section++)
+  {
+    printf("Section %d ", section);
+    
+    for(j = 0; j < 8; j++)
+    {
+      char c = exe->section_headers[section].name[j];
+
+      if(c)
+      {
+        printf("%c", c);
+      }
+    }
+
+    int begin = exe->section_headers[section].pointer_to_rawdata;
+    int end   = begin + exe->section_headers[section].size_of_rawdata;
+
+    printf(" %d %d\n", begin, end);
+  }
+
   return exe;
 }
 
@@ -104,6 +150,7 @@ void free_exe(exe_t* exe)
   DELETE(exe->dos_header);
   DELETE(exe->pe_header);
   DELETE(exe->coff_header);
+  DELETE(exe->section_headers);
 
   free(exe);
 }

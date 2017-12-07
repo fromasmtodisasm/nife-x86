@@ -5,22 +5,22 @@
 
 int test_types()
 {
-  if(sizeof(uint8) != 8)
+  if(sizeof(uint8) != 1)
     return -1;
 
-  if(sizeof(uint16) != 16)
+  if(sizeof(uint16) != 2)
     return -1;
 
-  if(sizeof(uint32) != 32)
+  if(sizeof(uint32) != 4)
     return -1;
 
-  if(sizeof(int8) != 8)
+  if(sizeof(int8) != 1)
     return -1;
 
-  if(sizeof(int16) != 16)
+  if(sizeof(int16) != 2)
     return -1;
 
-  if(sizeof(int32) != 32)
+  if(sizeof(int32) != 4)
     return -1;
 
   return 0;
@@ -43,7 +43,7 @@ int handle(const char* arg)
 
 int main(int argc, char** argv)
 {
-  if(!test_types())
+  if(test_types())
   {
     printf("sizeof(uint8) = %d\n", sizeof(uint8));
     printf("sizeof(uint16) = %d\n", sizeof(uint16));
