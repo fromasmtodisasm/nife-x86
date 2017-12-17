@@ -20,22 +20,6 @@ static int invalid_signature(uint8* signature, uint8* pattern, int size)
   return 0;
 }
 
-static uint8* read_whole_file(const char* name)
-{
-  FILE* file = fopen(name, "rb");
-  fseek(file, 0, SEEK_END);
-  uint32 size = ftell(file);
-  fseek(file, 0, SEEK_SET);
-
-  uint8* buf = malloc(size);
-  fread(buf, size, 1, file);
-  fclose(file);
-
-  printf("Loaded file size: %d bytes\n", size);
-
-  return buf;
-}
-
 exe_t* parse_exe(const char* name)
 {
   exe_t* exe = malloc(sizeof(exe_t));
@@ -87,13 +71,13 @@ exe_t* parse_exe(const char* name)
     return NULL;
   }
 
-  if(exe->coff_header->characteristics & IMAGE_FILE_EXECUTABLE_IMAGE != IMAGE_FILE_EXECUTABLE_IMAGE)
+  if((exe->coff_header->characteristics & IMAGE_FILE_EXECUTABLE_IMAGE) == IMAGE_FILE_EXECUTABLE_IMAGE)
   {
-    printf("The file is not executable.\n");
-    printf("Possibly you are trying to pass objective file to the NifeX86 disassembler.\n");
-    free_exe(exe);
-
-    return NULL;
+    printf("[Executable file]\n");
+  }
+  else
+  {
+    printf("[Objective file]\n");
   }
 
   printf("OS Version required: %d.%d\n", exe->pe_optional_header->major_osversion,

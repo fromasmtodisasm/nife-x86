@@ -13,4 +13,6 @@ typedef int32_t  int32;
 
 #define DELETE(X) do { if(X) free(X); } while(0);
 
+uint8* read_whole_file(const char* name);
+
 #endif
